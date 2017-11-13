@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block head %}
+{{ super() }}
+<script type="application/javascript" src="{{ url_for('static', filename='lib/js/bootstrap.js') }}"></script>
+{% endblock %}
+
+{% block title %}dropdown测试{% endblock %}
+
+{% block page_content %}
+<div id="geomlist">
+    <div class="dropdown">
+        <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenuType" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" value="dataTypeList">
+            资料类型
+            <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="dropdownMenuType" id="dataTypeList">
+          <li>1</li>
+          <li>2</li>
+        </ul>
+    </div>
+    <div class="dropdown">
+        <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenuRange" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" value="dataRangeList">
+            空间范围
+            <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="dropdownMenuRange" id="dataRangeList">
+          <li>a</li>
+          <li>b</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

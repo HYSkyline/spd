@@ -1,0 +1,53 @@
+html, body {
+	height: 100%;
+	width: 100%;
+}
+
+#map {
+	height: 100%;
+	width: 100%;
+	/*z-index: -1;*/
+    cursor: default;
+}
+
+#geomdataCatalog {
+	width: 15%;
+	height: 50%;
+	position: fixed;
+	left: 1%;
+	bottom: 5%;
+	z-index: 9999999;
+	/*overflow-y: hidden;*/
+	/*word-break: break-all;*/
+	/*font-family: 'STXiHei';*/
+	/*font-size: small;*/
+    user-select: none;
+    cursor: pointer;
+}
+#geomdataCatalog button {
+	width: 100%;
+	text-align: left;
+}
+#geomdataCatalog ul {
+	width: 100%;
+}
+#geomlist {
+	position: relative;
+    padding: 4px;
+}
+hr {
+	margin-top: 6px;
+	margin-bottom: 6px;
+}
+
+#geominfo {
+	position: fixed;
+	right: 1%;
+	top: 2%;
+	z-index: 9999999;
+	user-select: none;
+	cursor: default;
+}
+#geoinfoTable {
+	table-layout: auto;
+}
