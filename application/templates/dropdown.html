@@ -3,31 +3,29 @@
 {% block head %}
 {{ super() }}
 <script type="application/javascript" src="{{ url_for('static', filename='lib/js/bootstrap.js') }}"></script>
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='lib/css/dropdown.css') }}">
 {% endblock %}
 
 {% block title %}dropdown测试{% endblock %}
 
 {% block page_content %}
-<div id="geomlist">
-    <div class="dropdown">
-        <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenuType" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" value="dataTypeList">
-            资料类型
-            <span class="caret"></span>
-        </button>
-        <ul class="dropdown-menu" aria-labelledby="dropdownMenuType" id="dataTypeList">
-          <li>1</li>
-          <li>2</li>
-        </ul>
-    </div>
-    <div class="dropdown">
-        <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenuRange" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" value="dataRangeList">
-            空间范围
-            <span class="caret"></span>
-        </button>
-        <ul class="dropdown-menu" aria-labelledby="dropdownMenuRange" id="dataRangeList">
-          <li>a</li>
-          <li>b</li>
-        </ul>
-    </div>
+<div class="sk-cube-grid" id="gridLoading">
+	<div class="sk-cube sk-cube1"></div>
+	<div class="sk-cube sk-cube2"></div>
+	<div class="sk-cube sk-cube3"></div>
+	<div class="sk-cube sk-cube4"></div>
+	<div class="sk-cube sk-cube5"></div>
+	<div class="sk-cube sk-cube6"></div>
+	<div class="sk-cube sk-cube7"></div>
+	<div class="sk-cube sk-cube8"></div>
+	<div class="sk-cube sk-cube9"></div>
 </div>
+<button onclick="shownLoading()">loading</button>
+
+<script type="text/javascript">
+	function shownLoading() {
+			var gridLoading = document.getElementById('gridLoading');
+			gridLoading.style.visibility = 'hidden';
+		}	
+</script>
 {% endblock %}

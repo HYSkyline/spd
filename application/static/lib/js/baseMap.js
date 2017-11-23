@@ -1,4 +1,4 @@
-var map = L.map('map').setView([36.67127182429413, 117.01032656639109], 12);
+var map = L.map('map').setView([30.67127182429413, 120.01032656639109], 12);
 var streetMap = L.layerGroup([L.tileLayer('http://tile-{s}.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 })]);
@@ -13,5 +13,5 @@ var mapBase = {
     'ESRI HD': esriMap,
     '空白底图': blankMap
 };
-map.addLayer(esriMap);
-premap = esriMap;
+map.addLayer(blankMap);
+premap = blankMap;

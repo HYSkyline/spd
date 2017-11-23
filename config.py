@@ -35,6 +35,6 @@ config = {
 
 
 if __name__ == '__main__':
-    print 'config check.'
-    print config
-    print 'config checkout.'
+    print('config check.')
+    print(config)
+    print('config checkout.')

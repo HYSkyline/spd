@@ -7,256 +7,122 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='lib/css/leaflet.css') }}" >
 <script type="application/javascript" src="{{ url_for('static', filename='lib/js/leaflet.js') }}"></script>
 <script src="{{ url_for('static', filename='lib/js/esri-leaflet.js') }}"></script>
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='lib/css/gridLoading.css') }}">
 {% endblock %}
 {% block title %}主页测试{% endblock %}
 
 {% block page_content %}
-<div id="map"></div>
+<!-- 页面加载符号 -->
+<div class="spinner" id="gridLoading">
+  <div class="dot1"></div>
+  <div class="dot2"></div>
+</div>
 
+<!-- 图层已添加的警告框 -->
+<div id="geomviewListNote"></div>
+
+<!-- 页面加载DOM元素 -->
+<div id="loading"></div>
+<!-- 底图元素 -->
+<div id="map"></div>
+<!-- 左下角数据目录 -->
 <div class="panel panel-default" id="geomdataCatalog">
 <div class="panel-heading">矢量数据清单</div>
-<div id="geomlist">
-    <form onchange="changeBaseMap()">
-        <div class="radio">
-            <label>
-                <input type="radio" name="basemap" id="OpenStreetMap" value="openstreetmap" />
-                街道地图
-            </label>
+    <div id="geomlist">
+        <form onchange="changeBaseMap()">
+            <div class="radio">
+                <label>
+                    <input type="radio" name="basemap" id="OpenStreetMap" value="openstreetmap" />
+                    街道地图
+                </label>
+            </div>
+            <div class="radio">
+                <label>
+                    <input type="radio" name="basemap" id="GoogleMap" value="googlemap" />
+                    卫星地图
+                </label>
+            </div>
+            <div class="radio">
+                <label>
+                    <input type="radio" name="basemap" id="EsriMap" value="esrimap" />
+                    影像地图
+                </label>
+            </div>
+            <div class="radio">
+                <label>
+                    <input type="radio" name="basemap" id="BlankMap" value="blankmap" checked />
+                    空白底图
+                </label>
+            </div>
+        </form>
+        <hr />
+        <div class="dropdown">
+            <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenuType" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" value="dataTypeList" onclick="catalogList(this.value)">
+                资料类型
+                <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuType" id="dataTypeList"></ul>
         </div>
-        <div class="radio">
-            <label>
-                <input type="radio" name="basemap" id="GoogleMap" value="googlemap" />
-                卫星地图
-            </label>
+        <div class="dropdown">
+            <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenuRange" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" value="dataRangeList" onclick="catalogList(this.value)">
+                空间范围
+                <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuRange" id="dataRangeList"></ul>
         </div>
-        <div class="radio">
-            <label>
-                <input type="radio" name="basemap" id="EsriMap" value="esrimap" checked />
-                影像地图
-            </label>
-        </div>
-        <div class="radio">
-            <label>
-                <input type="radio" name="basemap" id="BlankMap" value="blankmap" />
-                空白底图
-            </label>
-        </div>
-    </form>
-    <hr />
-    <div class="dropdown">
-        <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenuType" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" value="dataTypeList" onclick="catalogList(this.value)">
-            资料类型
-            <span class="caret"></span>
-        </button>
-        <ul class="dropdown-menu" aria-labelledby="dropdownMenuType" id="dataTypeList"></ul>
+        <hr />
+        <div id="geomdataList"></div>
     </div>
-    <div class="dropdown">
-        <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenuRange" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" value="dataRangeList" onclick="catalogList(this.value)">
-            空间范围
-            <span class="caret"></span>
-        </button>
-        <ul class="dropdown-menu" aria-labelledby="dropdownMenuRange" id="dataRangeList"></ul>
-    </div>
-    <hr />
-    <div id="geomdataList"></div>
 </div>
-</div>
-
+<!-- 右上角数据信息 -->
 <div class="panel panel-default" id="geominfo">
     <div class="panel-heading">数据信息</div>
     <div class="panel-body" id="geomviewList"></div>
     <table class="table table-bordered text-nowrap" id="geoinfoTable"></table>
 </div>
 
+<!-- 右下角符号系统框 -->
+<div class="panel panel-default" id="geoSymbolPanel">
+    <div class="panel-heading">图层样式</div>
+    <div class="panel-body" id="geoSymbolPanelBody"></div>
+</div>
+
+<!-- 浮动的渲染字段选择框 -->
+<div class="modal fade" id="fieldModal" tabindex="-1" role="dialog" aria-labelledby="fieldModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="fieldModalLabel">字段列表</h4>
+            </div>
+            <div class="modal-body" id="fieldModalBody">
+                <p>选择要着色的字段</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    取消着色
+                </button>
+                <button type="button" class="btn btn-primary" onclick="selectField()">
+                    开始着色
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function compareFunction (a, b) {
+        if (a < b) {
+            return 1;
+        } else if (a > b) {
+            return -1;
+        } else {
+            return 0;
+        }
+    }
+</script>
 <script type="text/javascript" src="{{ url_for('static', filename='lib/js/baseMap.js') }}"></script>
-<script type="text/javascript">
-    // 取回一级目录中的二级目录列表
-    function catalogList(catalogArg) {
-        var catalogList = document.getElementById(catalogArg);
-        if (catalogList.innerHTML === '') {
-            $.ajax({
-                type: "GET",
-                url: "http://127.0.0.1:5000/api/geocatalog/",
-                data: {
-                    catalog: catalogArg.slice(4,-4)
-                },
-                contentType: "application/json",
-                dataType: "json",
-                success: function (data) {
-                    for (var i = 0; i < data.catalog.length; i++) {
-                        var catalogName = document.createElement('li');
-                        catalogName.innerHTML = data.catalog[i];
-                        catalogList.appendChild(catalogName);
-                        catalogName.setAttribute('onclick', "geodataList(this.parentElement.previousElementSibling, this.innerHTML)");
-                        catalogList.appendChild(catalogName);
-                    }
-                }
-            })
-        }
-    }
-    // 根据二级目录取回数据名称列表
-    function geodataList(menuDom, menuValue) {
-        menuDom.innerHTML = menuValue + '<span class="caret"></span>';
-        var typefilter = document.getElementById('dropdownMenuType').innerHTML.replace(/\s+/g,"").slice(0,-26);
-        if (typefilter === '资料类型') {typefilter = ''};
-        var rangefilter = document.getElementById('dropdownMenuRange').innerHTML.replace(/\s+/g,"").slice(0,-26);
-        if (rangefilter === '空间范围') {rangefilter = ''};
-        $.ajax({
-            type: "GET",
-            url: "http://127.0.0.1:5000/api/geodataList/",
-            data: {
-                type: typefilter,
-                range: rangefilter
-            },
-            contentType: "application/json",
-            dataType: "json",
-            success: function (data) {
-                var geomdataList = document.getElementById('geomdataList');
-                geomdataList.innerHTML = '';
-                for (var i = 0; i < data.geomlist.length; i++) {
-                    var geomdataName = document.createElement('li');
-                    geomdataName.innerHTML = data.geomlist[i][0];
-                    geomdataList.appendChild(geomdataName);
-                    geomdataName.setAttribute('onclick', 'getGeomdata("' + data.geomlist[i][0] + '","' + data.geomlist[i][1] + '")');
-                    geomdataList.appendChild(geomdataName);
-                }
-            }
-        })
-    }
-    // 根据数据名称取回数据矢量表
-    function getGeomdata(filename, geomname) {
-        $.ajax({
-            type: "GET",
-            url: "http://127.0.0.1:5000/api/geomview/",
-            data: {
-                geomref: geomname
-            },
-            contentType: "application/json",
-            dataType: "json",
-            success: function (data) {
-                geomJson = L.geoJSON(JSON.parse(data.geom), {
-                    style: setGeoJsonStyle,
-                    onEachFeature: geomOutline
-                }).addTo(map);
-                addGeom(filename, geomname, geomJson);
-            }
-        })
-    }
-</script>
-<script type="text/javascript">
-    function setGeoJsonStyle(feature) {
-        // console.log(feature.properties.常住人口2016);
-        return {
-            weight: 1,
-            opacity: 1,
-            color: 'white',
-            fillOpacity: 0.4,
-            fillColor: getColor(feature.properties.常住人口2016)
-        };
-    }
-    function getColor(args) {
-        return args > 100000 ? '#800026' :
-                args > 50000  ? '#BD0026' :
-                args > 20000  ? '#E31A1C' :
-                args > 10000  ? '#FC4E2A' :
-                args > 5000   ? '#FD8D3C' :
-                args > 2000   ? '#FEB24C' :
-                args > 100   ? '#FED976' :
-                            '#FFEDA0';
-    }
-    function geomOutline(feature, layer) {
-        layer.on({
-            mouseover: highlightFeature,
-            mouseout: resetHighlight,
-            click: zoomToFeature
-        })
-    }
-    function highlightFeature(e) {
-        var layer = e.target;
-        layer.setStyle({
-            weight: 5,
-            color: 'rgba(255,255,255,1)',
-            dashArray: '',
-            fillOpacity: 0.7
-        });
-        if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
-            layer.bringToFront();
-        }
-        // info.update(layer.feature.properties);
-        infoUpdate(layer.feature.properties);
-    }
-    function resetHighlight(e) {
-        geomJson.resetStyle(e.target);
-        infoUpdate('');
-    }
-    function zoomToFeature(e) {
-        map.fitBounds(e.target.getBounds());
-    }
-    function infoUpdate(infodict) {
-        var geotable = document.getElementById('geoinfoTable');
-        geotable.innerHTML = '';
-        if (infodict !== '') {
-            for (var i = 0; i < Object.keys(infodict).length; i++) {
-                var geotableRow = document.createElement('tr');
-                var geotableBody = document.createElement('td');
-                var geotableValue = document.createElement('td');
-                geotableBody.innerHTML = Object.keys(infodict)[i];
-                geotableValue.innerHTML = infodict[Object.keys(infodict)[i]];
-                geotableRow.appendChild(geotableBody);
-                geotableRow.appendChild(geotableValue);
-                geotable.appendChild(geotableRow);
-            }
-        }
-    }
-</script>
-<script type="text/javascript">
-    function changeBaseMap() {
-        if (document.getElementById('OpenStreetMap').checked) {
-            premap.removeFrom(map);
-            premap = streetMap;
-            map.addLayer(streetMap);
-        }
-        else if (document.getElementById('GoogleMap').checked) {
-            premap.removeFrom(map);
-            map.addLayer(googleMap);
-            premap = googleMap;
-        }
-        else if (document.getElementById('EsriMap').checked) {
-            premap.removeFrom(map);
-            map.addLayer(esriMap);
-            premap = esriMap;
-        }
-        else {
-            premap.removeFrom(map);
-            map.addLayer(blankMap);
-            premap = blankMap;
-        }
-    }
-</script>
-<script type="text/javascript">
-    function addGeom(filename, geomname, layer) {
-        var geomviewList = document.getElementById('geomviewList');
-        var geomfileNameDiv = document.createElement('div');
-        var geomfileNameLabel = document.createElement('label');
-        var geomfileNameInput = document.createElement('input');
-        geomfileNameInput.setAttribute('type', 'checkbox');
-        geomfileNameInput.setAttribute('name', 'viewList');
-        geomfileNameInput.setAttribute('id', 'viewListInput' + geomname);
-        geomfileNameLabel.appendChild(geomfileNameInput);
-        geomfileNameLabel.innerHTML += filename;
-        geomfileNameDiv.appendChild(geomfileNameLabel);
-        geomfileNameDiv.setAttribute('id', 'viewListDiv' + geomname);
-        geomviewList.appendChild(geomfileNameDiv);
-        var geomfileNameInput = document.getElementById('viewListInput' + geomname);
-        geomfileNameInput.checked = true;
-        geomfileNameInput.addEventListener("click", function () {
-            var geomfileNameInput = document.getElementById('viewListInput' + geomname);
-            if (geomfileNameInput.checked) {
-                layer.addTo(map);
-            } else {
-                layer.removeFrom(map);
-            }
-        })
-    }
-</script>
+<script type="text/javascript" src="{{ url_for('static', filename='lib/js/geoview.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='lib/js/geostyle.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='lib/js/geointeractive.js') }}"></script>
 {% endblock %}

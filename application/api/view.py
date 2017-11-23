@@ -56,7 +56,7 @@ def geodataList():
     filter_type = request.args.get('type')
     filter_range = request.args.get('range')
     if filter_type + filter_range != '':
-    	data_filter = ''
+        data_filter = ''
         data_filter += database_filter_prepare(filter_type, 'datatype')
         data_filter += database_filter_prepare(filter_range, 'dataspatialrange')
         data_filter = data_filter[:-4]
