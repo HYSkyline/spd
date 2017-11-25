@@ -1,5 +1,6 @@
 // 设定图层交互式效果
 function geomOutline(feature, layer) {
+    layer.geomname = geoData.geomname;
     layer.on({
         mouseover: highlightFeature,
         mouseout: resetHighlight,
@@ -22,7 +23,14 @@ function highlightFeature(e) {
 }
 // 鼠标移开要素某一部分的效果
 function resetHighlight(e) {
-    geomJson.resetStyle(e.target);
+    var layer = e.target;
+    var layerData = Data.get(layer.geomname);
+
+    layer.setStyle({
+        weight: 1,
+        color: getColor(eval('layer.feature.properties.' + layerData.fieldSymbol), layerData.fieldStyle, layerData.SymbolDivideNum),
+        fillOpacity: 0.4
+    });
     infoUpdate('');
 }
 // 点击要素，自动缩放使要素充满视图

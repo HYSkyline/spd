@@ -89,8 +89,9 @@ function getGeomdata(filename, geomname) {
             contentType: "application/json",
             dataType: "json",
             success: function (data) {
-                geojson = JSON.parse(data.geom);
-                selectFieldList(geojson.features[0], filename, geomname);
+                geoData = {};
+                geoData.geojson = JSON.parse(data.geom);
+                selectFieldList(geoData.geojson.features[0], filename, geomname);
             }
         })
     }
@@ -143,11 +144,13 @@ function addGeom(filename, geomname, layer) {
     geomfileNameInput.checked = true;
     geomfileNameInput.addEventListener("click", function () {
         var geomfileNameInput = document.getElementById('viewListInput' + geomname);
+        var geoSymbolFeature = document.getElementById('legend-' + geomname);
         if (geomfileNameInput.checked) {
             layer.addTo(map);
+            geoSymbolFeature.style.display = 'inline';
         } else {
             layer.removeFrom(map);
+            geoSymbolFeature.style.display = 'none';
         }
     });
-    return true;
 }

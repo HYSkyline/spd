@@ -7,27 +7,63 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='lib/css/leaflet.css') }}" >
 <script type="application/javascript" src="{{ url_for('static', filename='lib/js/leaflet.js') }}"></script>
 <script src="{{ url_for('static', filename='lib/js/esri-leaflet.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='lib/js/data.js') }}"></script>
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='lib/css/gridLoading.css') }}">
 {% endblock %}
 {% block title %}主页测试{% endblock %}
 
 {% block page_content %}
+
+
 <!-- 页面加载符号 -->
 <div class="spinner" id="gridLoading">
   <div class="dot1"></div>
   <div class="dot2"></div>
 </div>
-
-<!-- 图层已添加的警告框 -->
-<div id="geomviewListNote"></div>
-
 <!-- 页面加载DOM元素 -->
 <div id="loading"></div>
+<!-- 图层已添加的警告框 -->
+<div id="geomviewListNote"></div>
+<!-- 浮动的渲染字段选择框 -->
+<div class="modal fade" id="fieldModal" tabindex="-1" role="dialog" aria-labelledby="fieldModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="fieldModalLabel">字段列表</h4>
+            </div>
+            <div class="modal-body" id="fieldModalBody"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    取消着色
+                </button>
+                <button type="button" class="btn btn-primary" onclick="selectField()">
+                    开始着色
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
 <!-- 底图元素 -->
 <div id="map"></div>
+
+<!-- 左上角变量存储区 -->
+<div class="panel panel-default" id="geocaPanel">
+    <div class="panel-body" id="geocaPanelBody"></div>
+</div>
+
 <!-- 左下角数据目录 -->
 <div class="panel panel-default" id="geomdataCatalog">
-<div class="panel-heading">矢量数据清单</div>
+    <div class="panel-heading">
+        矢量数据清单
+    </div>
     <div id="geomlist">
         <form onchange="changeBaseMap()">
             <div class="radio">
@@ -74,6 +110,7 @@
         <div id="geomdataList"></div>
     </div>
 </div>
+
 <!-- 右上角数据信息 -->
 <div class="panel panel-default" id="geominfo">
     <div class="panel-heading">数据信息</div>
@@ -83,32 +120,18 @@
 
 <!-- 右下角符号系统框 -->
 <div class="panel panel-default" id="geoSymbolPanel">
-    <div class="panel-heading">图层样式</div>
-    <div class="panel-body" id="geoSymbolPanelBody"></div>
-</div>
-
-<!-- 浮动的渲染字段选择框 -->
-<div class="modal fade" id="fieldModal" tabindex="-1" role="dialog" aria-labelledby="fieldModalLabel">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="fieldModalLabel">字段列表</h4>
-            </div>
-            <div class="modal-body" id="fieldModalBody">
-                <p>选择要着色的字段</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">
-                    取消着色
-                </button>
-                <button type="button" class="btn btn-primary" onclick="selectField()">
-                    开始着色
-                </button>
-            </div>
-        </div>
+    <div class="panel-heading">图例</div>
+    <div class="panel-body" id="geoSymbolPanelBody">
+        <div class="container" id="geoSymbolContainer"></div>
     </div>
 </div>
+
+
+
+
+
+
+
 
 <script type="text/javascript">
     function compareFunction (a, b) {
