@@ -110,15 +110,8 @@ hr {
 }
 
 
-/* 变量框 */
-#geocaPanel {
-	display: none;
-	position: fixed;
-	height: 40%;
-	width: 30%;
-	left: 3%;
-	top: 1%;
-	z-index: 9999999;
-	user-select: none;
-	cursor: default;
+/* 图例颜色选择框 */
+#legendColorContainer {
+	min-height: 10px;
+	background-color: white;
 }

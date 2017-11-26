@@ -242,8 +242,13 @@ function prepareLegend(fieldSymbol, filename, geomname, fieldStyle, SymbolDivide
         // 以div为载体生成图例颜色的具体要素
         var geoSymbolColorDiv = document.createElement('div');
         geoSymbolColorDiv.setAttribute('class', 'legendColor');
+        geoSymbolColorDiv.setAttribute('legendGeomname', geomname);
+        geoSymbolColorDiv.setAttribute('legendIndex', i);
+        geoSymbolColorDiv.setAttribute('id', 'legendColorDiv-' + i.toString());
+        geoSymbolColorDiv.setAttribute('onclick', 'selectColor("' + geomname + '", ' + i.toString() + ')');
         geoSymbolColorDiv.setAttribute('style', 'background-color: ' + legendColorList[i] + ';');
         geoSymbolColorDiv.innerHTML = '&nbsp';
+
 
         // 图例颜色列加载颜色具体要素
         geoSymbolColor.appendChild(geoSymbolColorDiv);
@@ -258,7 +263,29 @@ function prepareLegend(fieldSymbol, filename, geomname, fieldStyle, SymbolDivide
     }
     // 图例框要素加载图例DIV
     geoSymbolContainer.appendChild(geoSymbolFeature);
+
+    // 绑定颜色选择框
+    $('.legendColor').colpick({
+        colorScheme: 'light',
+        color: 'ffffff',
+        onChange: function (hsb, hex, rgb, el) {
+            $(el).css('background-color', 'rgba(' + rgb.r + ', ' + rgb.g + ', ' + rgb.b + ', 1)');
+        },
+        onSubmit: function (hsb, hex, rgb, el) {
+            console.log(el);
+            // geojsonChangeColor(geomname);
+            $(el).colpickHide();
+        }
+    });
 }
+// 调用颜色选择器
+function selectColor(geomname, i) {
+    var geoData = Data.get(geomname);
+    $('#legendColorDiv-' + i).colpickSetColor(colorRGBToHex(geoData.legendColorList[i]), setCurrent=false);
+    // 弹出图例颜色选择框
+    $('#legendColorDiv-' + i).colpickShow();
+}
+// 读取图例信息
 function getLegend(geomname) {
     var featureSymbolList = [];
     var legendDiv = document.getElementById('legend-' + geomname);
@@ -269,4 +296,23 @@ function getLegend(geomname) {
         });
     }
     return fieldSelectList;
+}
+// 'rgb(123, 156, 68)'' --> 'ffec0f'
+function colorRGBToHex(rgb){
+    var color = rgb.toString().match(/\d+/g);
+    var hex = "#";
+    for (var i = 0; i < 3; i++) {
+        hex += ("0" + Number(color[i]).toString(16)).slice(-2);
+    }
+    return hex;
+}
+function geojsonChangeColor(geomname) {
+    var geoData = Data.get(geomname);
+    geoData.Layer.setStyle({
+        weight: 1,
+        opacity: 1,
+        color: 'white',
+        fillColor: getColor(eval('layer.feature.properties.' + layerData.fieldSymbol), layerData.fieldStyle, layerData.SymbolDivideNum, layerData.legendColorList),
+        fillOpacity: 0.4
+    });
 }
