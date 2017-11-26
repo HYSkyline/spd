@@ -44,8 +44,6 @@ function selectFieldList(feature, filename, geomname) {
 function selectField() {
     $('#fieldModal').modal('hide');
 
-    
-
     // 读取数据名称和矢量要素表名
     geoData.filename = document.getElementById('modalfilename').innerHTML;
     geoData.geomname = document.getElementById('modalgeomname').innerHTML;
@@ -59,27 +57,11 @@ function selectField() {
     // 写入右上方图层表
     var geomviewListCheck = addGeom(geoData.filename, geoData.geomname, geoData.Layer);
     // 图例写入右下方样式表
-    setLegend(geoData.filename, geoData.geomname);
+    setLegend(geoData.fieldSymbol, geoData.filename, geoData.geomname, geoData.fieldStyle, geoData.SymbolDivideNum, geoData.legendColorList);
     // 要素写入底图
     geoData.Layer.addTo(map);
     map.fitBounds(geoData.Layer.getBounds());
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // 设置可视化效果
 function setGeoJsonStyle(feature) {
@@ -135,12 +117,6 @@ function setGeoJsonStyle(feature) {
     }
     return geoStyleOption;
 }
-
-
-
-
-
-
 //划定显示分级表, args为字段名的string变量
 // divideList = [0, 10, 20, 30, 40] 或者 divideList = [filename]
 function symbolDivideList(args, SymbolDivideNum) {
@@ -168,12 +144,6 @@ function symbolDivideList(args, SymbolDivideNum) {
         return divideList;
     }
 }
-
-
-
-
-
-
 // 设置分级色彩
 // legendColorList = ['rgba(255, 255, 255, 1)', 'rgba(255, 128, 128, 1)', 'rgba(255, 0, 0, 1)'] 或 legendColorList = ['rgba(255, 255, 255, 1)']
 function getColorLevel(SymbolDivideNum) {
@@ -230,56 +200,12 @@ function getColor(args, divideList, SymbolDivideNum, legendColorList) {
     }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
 // 图例表初始化
-function setLegend(filename, geomname) {
-    if (geoData.fieldSymbol === null) {
-        // var geoSymbolFeature = document.createElement('div')
-        // geoSymbolFeature.setAttribute('id', 'legend-' + geomname);
-        // var geoSymbolHeaderRow = document.createElement('div');
-        // geoSymbolHeaderRow.setAttribute('class', 'row');
-        // var geoSymbolHeading = document.createElement('div')
-        // geoSymbolHeading.setAttribute('class', 'col-md-12')
-        // geoSymbolHeading.setAttribute('id', 'geoSymbolHeader-' + geomname)
-        // var geoSymbolContainer = document.getElementById('geoSymbolContainer');
-        // geoSymbolHeaderRow.appendChild(geoSymbolHeading);
-        // geoSymbolFeature.appendChild(geoSymbolHeaderRow);
-        // geoSymbolHeading.innerHTML = '点此选择渲染字段';
-        // var geoSymbolRow = document.createElement('div');
-        // geoSymbolRow.setAttribute('class', 'row');
-        // var geoSymbolColor = document.createElement('div');
-        // geoSymbolColor.setAttribute('class', 'col-md-3');
-        // var geoSymbolLabel = document.createElement('div');
-        // geoSymbolLabel.setAttribute('class', 'col-md-9');
-        // var geoSymbolColorDiv = document.createElement('div');
-        // geoSymbolColorDiv.setAttribute('class', 'legendColor');
-        // geoSymbolColorDiv.setAttribute('style', 'background-color: white;');
-        // geoSymbolColorDiv.innerHTML = '&nbsp';
-        // geoSymbolLabel.innerHTML = filename;
-        // geoSymbolColor.appendChild(geoSymbolColorDiv);
-        // geoSymbolRow.appendChild(geoSymbolColor);
-        // geoSymbolRow.appendChild(geoSymbolLabel);
-        // geoSymbolFeature.appendChild(geoSymbolRow);
-        // geoSymbolContainer.appendChild(geoSymbolFeature);
-
-        prepareLegend(filename, geomname, geoData.fieldStyle, geoData.SymbolDivideNum);
-    } else {
-        // geoSymbolHeading.innerHTML = geoData.fieldSymbol;
-    }
+function setLegend(fieldSymbol, filename, geomname, fieldStyle, SymbolDivideNum, legendColorList) {
+    prepareLegend(fieldSymbol, filename, geomname, fieldStyle, SymbolDivideNum, legendColorList);
 }
 // 当 fieldStyle.length = 1 且 SymbolDivideNum = 0 时, 可以判定为素色渲染, 否则为彩色渲染
-function prepareLegend(filename, geomname, fieldStyle, SymbolDivideNum) {
+function prepareLegend(fieldSymbol, filename, geomname, fieldStyle, SymbolDivideNum, legendColorList) {
     // 获取图例框要素
     var geoSymbolContainer = document.getElementById('geoSymbolContainer');
     // legend最外围container
@@ -292,17 +218,16 @@ function prepareLegend(filename, geomname, fieldStyle, SymbolDivideNum) {
     var geoSymbolHeading = document.createElement('div');
     geoSymbolHeading.setAttribute('class', 'col-md-12');
     geoSymbolHeading.setAttribute('id', 'geoSymbolHeader-' + geomname);
-    if (geoData.fieldSymbol === null) {
+    if (fieldSymbol === null) {
         geoSymbolHeading.innerHTML = '点此选择渲染字段';
     } else {
-        geoSymbolHeading.innerHTML = geoData.fieldSymbol;
+        geoSymbolHeading.innerHTML = fieldSymbol;
     }
     
     // 被渲染字段加入图例框
     geoSymbolHeaderRow.appendChild(geoSymbolHeading);
     geoSymbolFeature.appendChild(geoSymbolHeaderRow);
     
-
     for (var i = 0; i < fieldStyle.length; i++) {
         // 图例内容行
         var geoSymbolRow = document.createElement('div');
@@ -313,7 +238,6 @@ function prepareLegend(filename, geomname, fieldStyle, SymbolDivideNum) {
         // 以col-9显示图例标注
         var geoSymbolLabel = document.createElement('div');
         geoSymbolLabel.setAttribute('class', 'col-md-9');
-
 
         // 以div为载体生成图例颜色的具体要素
         var geoSymbolColorDiv = document.createElement('div');
@@ -332,7 +256,7 @@ function prepareLegend(filename, geomname, fieldStyle, SymbolDivideNum) {
         // 最外围图例框加载该图例行
         geoSymbolFeature.appendChild(geoSymbolRow);
     }
-    // 图例框要素加载图例
+    // 图例框要素加载图例DIV
     geoSymbolContainer.appendChild(geoSymbolFeature);
 }
 function getLegend(geomname) {

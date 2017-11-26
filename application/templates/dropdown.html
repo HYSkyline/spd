@@ -1,9 +1,60 @@
 <!DOCTYPE html>
 <html>
 <head>
+	<script type="text/javascript" src="../static/lib/js/jquery-3.2.1.js"></script>
+	<script type="text/javascript" src="../static/lib/js/colpick.js"></script>
+	<link rel="stylesheet" type="text/css" href="../static/lib/css/colpick.css">
+	<link rel="stylesheet" type="text/css" href="../static/lib/css/test.css">
 	<title>test</title>
 </head>
 <body>
 	<input type="text" id="in" placeholder="test" />
+	<div id="c0"></div>
+	<br>
+	<br>
+	<div class="color" id="c1" onclick="showColorPick(this)"></div>
+	<div class="color" id="c2" onclick="showColorPick(this)"></div>
+
+	<script type="text/javascript">
+		var elem = document.getElementById('c0');
+		var bgc = window.getComputedStyle(elem, null).getPropertyValue('background-color');
+		$('#c0').colpick({
+			colorScheme: 'light',
+			color: colorRGBToHex(bgc),
+			onChange:function(hsb,hex,rgb,el) {
+				$(el).css('background-color', '#'+hex);
+			},
+			onSubmit: function (hsb, hex, rgb, el) {
+				$(el).colpickHide();
+			}
+		});
+		
+
+		function showColorPick(elem) {
+			var c0 = document.getElementById('c0');
+			var bgc = window.getComputedStyle(elem, null).getPropertyValue('background-color');
+			$('#c0').colpickSetColor(colorRGBToHex(bgc), setCurrent=false);
+			$(c0).colpick({
+				colorScheme: 'light',
+				color: colorRGBToHex(bgc),
+				onChange:function(hsb,hex,rgb,el) {
+					$(el).css('background-color', '#'+hex);
+				},
+				onSubmit: function (hsb, hex, rgb, el) {
+					console.log(el);
+					$(el).colpickHide();
+				}
+			}).colpickShow();
+		}
+
+		function colorRGBToHex(rgb){
+		    var color = rgb.toString().match(/\d+/g);
+		    var hex = "#";
+		    for (var i = 0; i < 3; i++) {
+		        hex += ("0" + Number(color[i]).toString(16)).slice(-2);
+		    }
+		    return hex;
+		}
+	</script>
 </body>
 </html>

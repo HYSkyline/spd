@@ -1,0 +1,19 @@
+input {
+	border: none;
+}
+#c0 {
+	height: 50px;
+	width: 60px;
+	border: solid 1px black;
+	background-color: rgba(0, 120, 201, 1);
+}
+#c1 {
+	height: 100px;
+	width: 70px;
+	background-color: rgba(255, 0, 0, 1);
+}
+#c2 {
+	height: 100px;
+	width: 70px;
+	background-color: rgba(0, 255, 0, 1);
+}

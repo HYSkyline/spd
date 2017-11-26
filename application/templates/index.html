@@ -8,13 +8,13 @@
 <script type="application/javascript" src="{{ url_for('static', filename='lib/js/leaflet.js') }}"></script>
 <script src="{{ url_for('static', filename='lib/js/esri-leaflet.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='lib/js/data.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='lib/js/colpick.js') }}"></script>
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='lib/css/gridLoading.css') }}">
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='lib/css/colpick.css') }}">
 {% endblock %}
 {% block title %}主页测试{% endblock %}
 
 {% block page_content %}
-
-
 <!-- 页面加载符号 -->
 <div class="spinner" id="gridLoading">
   <div class="dot1"></div>
