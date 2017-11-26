@@ -25,10 +25,15 @@ function highlightFeature(e) {
 function resetHighlight(e) {
     var layer = e.target;
     var layerData = Data.get(layer.geomname);
-
+    // console.log('reset Style. args:');
+    // console.log(eval('layer.feature.properties.' + layerData.fieldSymbol));
+    // console.log(layerData.fieldStyle);
+    // console.log(layerData.SymbolDivideNum);
     layer.setStyle({
         weight: 1,
-        color: getColor(eval('layer.feature.properties.' + layerData.fieldSymbol), layerData.fieldStyle, layerData.SymbolDivideNum),
+        opacity: 1,
+        color: 'white',
+        fillColor: getColor(eval('layer.feature.properties.' + layerData.fieldSymbol), layerData.fieldStyle, layerData.SymbolDivideNum, layerData.legendColorList),
         fillOpacity: 0.4
     });
     infoUpdate('');

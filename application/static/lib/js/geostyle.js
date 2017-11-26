@@ -51,11 +51,10 @@ function selectField() {
     geoData.geomname = document.getElementById('modalgeomname').innerHTML;
 
     // 以setGeoJsonStyle方案生成可视化
-    geoData.Layer = L.geoJSON(geoData.geojson, {
+    geoData.Layer = L.geoJSON(geojson, {
         style: setGeoJsonStyle,
         onEachFeature: geomOutline
     });
-    geoData.Layer.dataname = geoData.geomname;
 
     // 写入右上方图层表
     var geomviewListCheck = addGeom(geoData.filename, geoData.geomname, geoData.Layer);
@@ -84,10 +83,11 @@ function selectField() {
 
 // 设置可视化效果
 function setGeoJsonStyle(feature) {
+    // 尝试获取图例项外部DIV
     var geoLegendContent = document.getElementById('legend-' + geoData.geomname);
     if (geoLegendContent) {
-        // 绑定数据至Data库
-        Data.get(geoData.geomname, geoData);
+        // 自Data库读取数据, 未完成
+        Data.get(geoData.geomname);
 
     } else {
         // 确定用于渲染的字段, fieldSymbol为string类型
@@ -108,20 +108,32 @@ function setGeoJsonStyle(feature) {
             geoData.SymbolDivideNum = 0;
         } else {
             geoData.SymbolDivideNum = document.getElementById('SymbolDivideNumInput').value;
+            // 默认值颜色分类为4级
+            if (geoData.SymbolDivideNum === "") {
+                geoData.SymbolDivideNum = 4;
+            }
         }
         geoData.fieldStyle = symbolDivideList(geoData.fieldSymbol, geoData.SymbolDivideNum);
 
+        // 返回渲染设置
+        var geoStyleOption = {
+            weight: 1,
+            opacity: 1,
+            color: 'white',
+            fillOpacity: 0.4,
+            fillColor: getColor(eval('feature.properties.' + geoData.fieldSymbol), geoData.fieldStyle, geoData.SymbolDivideNum, [])
+        };
+
         // 绑定数据至Data库
+        // geoData.SymbolDivideNum = 0;
+        // geoData.fieldStyle = [10, 20, 30, ...] or = [filename];
+        // geoData.fieldSymbol = field or = null;
+        // geoData.filename = filename;
+        // geoData.geomname = geomname;
+        // geoData.legendColorList = ['rgba(255, 255, 255, 1)', 'rgba(255, 128, 128, 1)', 'rgba(255, 0, 0, 1)'] 或 legendColorList = ['rgba(255, 255, 255, 1)']
         Data.set(geoData.geomname, geoData);
     }
-
-    return {
-        weight: 1,
-        opacity: 1,
-        color: 'white',
-        fillOpacity: 0.4,
-        fillColor: getColor(eval('feature.properties.' + geoData.fieldSymbol), geoData.fieldStyle, geoData.SymbolDivideNum)
-    };
+    return geoStyleOption;
 }
 
 
@@ -141,8 +153,8 @@ function symbolDivideList(args, SymbolDivideNum) {
         var divideList = [];
         // console.log('颜色分类:' + SymbolDivideNum.toString());
         // 以values为容器，通过eval传入具体的属性值
-        for (var i = 0; i < geoData.geojson.features.length; i++) {
-            values.push(eval('geoData.geojson.features[i].properties.' + args));
+        for (var i = 0; i < geojson.features.length; i++) {
+            values.push(eval('geojson.features[i].properties.' + args));
         }
         // 对具体属性值进行排序
         values.sort(compareFunction);
@@ -173,22 +185,48 @@ function getColorLevel(SymbolDivideNum) {
     } else {
         legendColorList.push('rgba(255, 255, 255, 1)')
     }
+    geoData.legendColorList = legendColorList;
     return legendColorList;
 }
 // 返回每一级的颜色, 形式如上
-function getColor(args, divideList, SymbolDivideNum) {
-    legendColorList = getColorLevel(SymbolDivideNum);
-    if (divideList.length > 1) {
-        // console.log('开始彩渲, 检测共需循环' + SymbolDivideNum.toString() + '次');
-        for (var i = 0; i < SymbolDivideNum; i++) {
-            // console.log('当前属性值: ' + args.toString() + '  对比标准: ' + divideList[i].toString());
-            if (args > divideList[i]) {
-                return legendColorList[i];
+function getColor(args, divideList, SymbolDivideNum, legendColorList) {
+    if (legendColorList.length > 0) {
+        // console.log('legendColorList exist.');
+        if (divideList.length > 1) {
+            // console.log('开始彩渲, 检测共需循环' + SymbolDivideNum.toString() + '次');
+            for (var i = 0; i < SymbolDivideNum; i++) {
+                // console.log('当前i: ' + i.toString() + '  当前属性值: ' + args.toString() + '  对比标准: ' + divideList[i].toString());
+                if (args > divideList[i]) {
+                    // console.log('返回颜色: ' + legendColorList[i]);
+                    return legendColorList[i];
+                }
+                if (i === SymbolDivideNum - 1) {
+                    // console.log('最终返回颜色: ' + legendColorList[i]);
+                    return legendColorList[i];
+                }
             }
+        } else {
+            // console.log('开始素渲');
+            return legendColorList[0];
         }
     } else {
-        // console.log('开始素渲');
-        return legendColorList[0];
+        legendColorList = getColorLevel(SymbolDivideNum);
+        if (divideList.length > 1) {
+            // console.log('开始彩渲, 检测共需循环' + SymbolDivideNum.toString() + '次');
+            for (var i = 0; i < SymbolDivideNum; i++) {
+                // console.log('当前属性值: ' + args.toString() + '  对比标准: ' + divideList[i].toString());
+                if (args > divideList[i]) {
+                    return legendColorList[i];
+                }
+                if (i === SymbolDivideNum - 1) {
+                    // console.log('最终返回颜色: ' + legendColorList[i]);
+                    return legendColorList[i];
+                }
+            }
+        } else {
+            // console.log('开始素渲');
+            return legendColorList[0];
+        }
     }
 }
 
@@ -237,7 +275,7 @@ function setLegend(filename, geomname) {
 
         prepareLegend(filename, geomname, geoData.fieldStyle, geoData.SymbolDivideNum);
     } else {
-        geoSymbolHeading.innerHTML = geoData.fieldSymbol;
+        // geoSymbolHeading.innerHTML = geoData.fieldSymbol;
     }
 }
 // 当 fieldStyle.length = 1 且 SymbolDivideNum = 0 时, 可以判定为素色渲染, 否则为彩色渲染

@@ -90,8 +90,8 @@ function getGeomdata(filename, geomname) {
             dataType: "json",
             success: function (data) {
                 geoData = {};
-                geoData.geojson = JSON.parse(data.geom);
-                selectFieldList(geoData.geojson.features[0], filename, geomname);
+                geojson = JSON.parse(data.geom);
+                selectFieldList(geojson.features[0], filename, geomname);
             }
         })
     }
