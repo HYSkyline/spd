@@ -244,7 +244,7 @@ function prepareLegend(fieldSymbol, filename, geomname, fieldStyle, SymbolDivide
         geoSymbolColorDiv.setAttribute('class', 'legendColor');
         geoSymbolColorDiv.setAttribute('legendGeomname', geomname);
         geoSymbolColorDiv.setAttribute('legendIndex', i);
-        geoSymbolColorDiv.setAttribute('id', 'legendColorDiv-' + i.toString());
+        geoSymbolColorDiv.setAttribute('id', 'legendColorDiv-' + geomname + '-' + i.toString());
         geoSymbolColorDiv.setAttribute('onclick', 'selectColor("' + geomname + '", ' + i.toString() + ')');
         geoSymbolColorDiv.setAttribute('style', 'background-color: ' + legendColorList[i] + ';');
         geoSymbolColorDiv.innerHTML = '&nbsp';
@@ -281,7 +281,7 @@ function prepareLegend(fieldSymbol, filename, geomname, fieldStyle, SymbolDivide
 function selectColor(geomname, i) {
     
     // 弹出图例颜色选择框
-    $('#legendColorDiv-' + i).colpick({
+    $('#legendColorDiv-' + geomname + '-' + i).colpick({
         colorScheme: 'light',
         color: 'ffffff',
         onChange: function (hsb, hex, rgb, el) {
@@ -291,7 +291,7 @@ function selectColor(geomname, i) {
             // console.log(legendIndex);
             var geoData = Data.get(geomname);
             geoData.legendColorList[i] = 'rgba(' + rgb.r + ', ' + rgb.g + ', ' + rgb.b + ', 1)';
-            console.log(geoData.legendColorList);
+            // console.log(geoData.legendColorList);
             for (var layer_i = 0; layer_i < Object.keys(geoData.Layer._layers).length; layer_i++) {
                 // console.log('id: ' + Object.keys(geoData.Layer._layers)[layer_i].toString());
                 // console.log('prop: ' + geoData.Layer._layers[Object.keys(geoData.Layer._layers)[layer_i]].feature.properties[geoData.fieldSymbol].toString());
@@ -318,8 +318,8 @@ function selectColor(geomname, i) {
         }
     });
     var geoData = Data.get(geomname);
-    $('#legendColorDiv-' + i).colpickSetColor(colorRGBToHex(geoData.legendColorList[i]), setCurrent=false);
-    $('#legendColorDiv-' + i).colpickShow();
+    $('#legendColorDiv-' + geomname + '-' + i).colpickSetColor(colorRGBToHex(geoData.legendColorList[i]), setCurrent=false);
+    $('#legendColorDiv-' + geomname + '-' + i).colpickShow();
 }
 // 读取图例信息
 function getLegend(geomname) {
