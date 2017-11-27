@@ -279,7 +279,7 @@ function prepareLegend(fieldSymbol, filename, geomname, fieldStyle, SymbolDivide
 }
 // 调用颜色选择器
 function selectColor(geomname, i) {
-    var geoData = Data.get(geomname);
+    
     // 弹出图例颜色选择框
     $('#legendColorDiv-' + i).colpick({
         colorScheme: 'light',
@@ -289,9 +289,9 @@ function selectColor(geomname, i) {
             // console.log(el);
             var legendIndex = parseInt($(el).attr('legendIndex'));
             // console.log(legendIndex);
-
+            var geoData = Data.get(geomname);
             geoData.legendColorList[i] = 'rgba(' + rgb.r + ', ' + rgb.g + ', ' + rgb.b + ', 1)';
-            // console.log(geoData.legendColorList);
+            console.log(geoData.legendColorList);
             for (var layer_i = 0; layer_i < Object.keys(geoData.Layer._layers).length; layer_i++) {
                 // console.log('id: ' + Object.keys(geoData.Layer._layers)[layer_i].toString());
                 // console.log('prop: ' + geoData.Layer._layers[Object.keys(geoData.Layer._layers)[layer_i]].feature.properties[geoData.fieldSymbol].toString());
