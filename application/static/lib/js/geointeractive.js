@@ -24,11 +24,8 @@ function highlightFeature(e) {
 // 鼠标移开要素某一部分的效果
 function resetHighlight(e) {
     var layer = e.target;
+    // console.log(layer);
     var layerData = Data.get(layer.geomname);
-    // console.log('reset Style. args:');
-    // console.log(eval('layer.feature.properties.' + layerData.fieldSymbol));
-    // console.log(layerData.fieldStyle);
-    // console.log(layerData.SymbolDivideNum);
     layer.setStyle({
         weight: 1,
         opacity: 1,

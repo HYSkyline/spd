@@ -54,6 +54,15 @@ function selectField() {
         onEachFeature: geomOutline
     });
 
+    // 绑定数据至Data库
+    // geoData.SymbolDivideNum = 0;
+    // geoData.fieldStyle = [10, 20, 30, ...] or = [filename];
+    // geoData.fieldSymbol = field or = null;
+    // geoData.filename = filename;
+    // geoData.geomname = geomname;
+    // geoData.legendColorList = ['rgba(255, 255, 255, 1)', 'rgba(255, 128, 128, 1)', 'rgba(255, 0, 0, 1)'] 或 legendColorList = ['rgba(255, 255, 255, 1)']
+    Data.set(geoData.geomname, geoData);
+
     // 写入右上方图层表
     var geomviewListCheck = addGeom(geoData.filename, geoData.geomname, geoData.Layer);
     // 图例写入右下方样式表
@@ -105,15 +114,6 @@ function setGeoJsonStyle(feature) {
             fillOpacity: 0.4,
             fillColor: getColor(eval('feature.properties.' + geoData.fieldSymbol), geoData.fieldStyle, geoData.SymbolDivideNum, [])
         };
-
-        // 绑定数据至Data库
-        // geoData.SymbolDivideNum = 0;
-        // geoData.fieldStyle = [10, 20, 30, ...] or = [filename];
-        // geoData.fieldSymbol = field or = null;
-        // geoData.filename = filename;
-        // geoData.geomname = geomname;
-        // geoData.legendColorList = ['rgba(255, 255, 255, 1)', 'rgba(255, 128, 128, 1)', 'rgba(255, 0, 0, 1)'] 或 legendColorList = ['rgba(255, 255, 255, 1)']
-        Data.set(geoData.geomname, geoData);
     }
     return geoStyleOption;
 }
@@ -265,36 +265,61 @@ function prepareLegend(fieldSymbol, filename, geomname, fieldStyle, SymbolDivide
     geoSymbolContainer.appendChild(geoSymbolFeature);
 
     // 绑定颜色选择框
-    $('.legendColor').colpick({
-        colorScheme: 'light',
-        color: 'ffffff',
-        onChange: function (hsb, hex, rgb, el) {
-            $(el).css('background-color', 'rgba(' + rgb.r + ', ' + rgb.g + ', ' + rgb.b + ', 1)');
-        },
-        onSubmit: function (hsb, hex, rgb, el) {
-            // geojsonChangeColor(geomname);
-            $(el).colpickHide();
-        }
-    });
+    // $('.legendColor').colpick({
+    //     colorScheme: 'light',
+    //     color: 'ffffff',
+    //     onChange: function (hsb, hex, rgb, el) {
+    //         $(el).css('background-color', 'rgba(' + rgb.r + ', ' + rgb.g + ', ' + rgb.b + ', 1)');
+    //     },
+    //     onSubmit: function (hsb, hex, rgb, el) {
+    //         // geojsonChangeColor(geomname);
+    //         $(el).colpickHide();
+    //     }
+    // });
 }
 // 调用颜色选择器
 function selectColor(geomname, i) {
     var geoData = Data.get(geomname);
-    $('#legendColorDiv-' + i).colpickSetColor(colorRGBToHex(geoData.legendColorList[i]), setCurrent=false);
     // 弹出图例颜色选择框
-    $('#legendColorDiv-' + i).colpick(
+    $('#legendColorDiv-' + i).colpick({
         colorScheme: 'light',
         color: 'ffffff',
         onChange: function (hsb, hex, rgb, el) {
+            // console.log('输出el: onChange');
+            // console.log(el);
+            var legendIndex = parseInt($(el).attr('legendIndex'));
+            // console.log(legendIndex);
+
+            geoData.legendColorList[i] = 'rgba(' + rgb.r + ', ' + rgb.g + ', ' + rgb.b + ', 1)';
+            // console.log(geoData.legendColorList);
+            for (var layer_i = 0; layer_i < Object.keys(geoData.Layer._layers).length; layer_i++) {
+                // console.log('id: ' + Object.keys(geoData.Layer._layers)[layer_i].toString());
+                // console.log('prop: ' + geoData.Layer._layers[Object.keys(geoData.Layer._layers)[layer_i]].feature.properties[geoData.fieldSymbol].toString());
+                // console.log(geoData.fieldStyle);
+                // console.log(geoData.SymbolDivideNum.toString());
+                // console.log(geoData.legendColorList);
+                geoData.Layer._layers[Object.keys(geoData.Layer._layers)[layer_i].toString()].setStyle({
+                    weight: 1,
+                    opacity: 1,
+                    color: 'white',
+                    fillColor: getColor(geoData.Layer._layers[Object.keys(geoData.Layer._layers)[layer_i]].feature.properties[geoData.fieldSymbol], geoData.fieldStyle, geoData.SymbolDivideNum, geoData.legendColorList),
+                    fillOpacity: 0.4
+                });
+            }
+            Data.set(geomname, geoData);
             $(el).css('background-color', 'rgba(' + rgb.r + ', ' + rgb.g + ', ' + rgb.b + ', 1)');
         },
         onSubmit: function (hsb, hex, rgb, el) {
             console.log('输出el:');
-            console.log(el);
+            // console.log(el);
             // geojsonChangeColor(geomname);
+            $(el).attr('slc', '354');
             $(el).colpickHide();
         }
-    ).colpickShow();
+    });
+    var geoData = Data.get(geomname);
+    $('#legendColorDiv-' + i).colpickSetColor(colorRGBToHex(geoData.legendColorList[i]), setCurrent=false);
+    $('#legendColorDiv-' + i).colpickShow();
 }
 // 读取图例信息
 function getLegend(geomname) {
