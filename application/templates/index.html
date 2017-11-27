@@ -32,13 +32,19 @@
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 <h4 class="modal-title" id="fieldModalLabel">字段列表</h4>
             </div>
-            <div class="modal-body" id="fieldModalBody"></div>
+            <div class="modal-body">
+                <p>选择要着色的字段(也可以不选字段, 渲染白底图层)</p>
+                <input type="radio" name="fieldType" value="numType" checked="true" />展示分级
+                <input type="radio" name="fieldType" value="strType" />展示唯一值
+                <input type="text" name="symbolDivideNumInput" id="SymbolDivideNumInput" placeholder="若是数值型字段(常住人口、GDP等)的分类, 请输入分类数量(默认为5)">
+                <div id="fieldModalBody"></div>
+            </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">
-                    取消着色
+                    取消选择
                 </button>
                 <button type="button" class="btn btn-primary" onclick="selectField()">
-                    开始着色
+                    开始渲染
                 </button>
             </div>
         </div>
