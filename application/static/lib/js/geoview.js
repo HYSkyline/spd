@@ -49,9 +49,9 @@ function catalogList(catalogArg) {
 function geodataList(menuDom, menuValue) {
     menuDom.innerHTML = menuValue + '<span class="caret"></span>';
     var typefilter = document.getElementById('dropdownMenuType').innerHTML.replace(/\s+/g,"").slice(0,-26);
-    if (typefilter === '资料类型') {typefilter = ''};
+    if (typefilter === '资料类型') {typefilter = ''}
     var rangefilter = document.getElementById('dropdownMenuRange').innerHTML.replace(/\s+/g,"").slice(0,-26);
-    if (rangefilter === '空间范围') {rangefilter = ''};
+    if (rangefilter === '空间范围') {rangefilter = ''}
     $.ajax({
         type: "GET",
         url: "http://127.0.0.1:5000/api/geodataList/",
@@ -89,9 +89,14 @@ function getGeomdata(filename, geomname) {
             contentType: "application/json",
             dataType: "json",
             success: function (data) {
-                geoData = {};
                 geojson = JSON.parse(data.geom);
-                selectFieldList(geojson.features[0], filename, geomname);
+                geoData = {};
+                // 读取数据名称和矢量要素表名
+                geoData.filename = filename;
+                geoData.geomname = geomname;
+                geoData.fields = geojson.features[0];
+                selectFieldList();
+                viewList = [];
             }
         })
     }
@@ -112,7 +117,7 @@ function GeomlistCheck(filename, geomname) {
             geomNoteButton.setAttribute('aria-label', 'Close');
             var geomNoteSpan = document.createElement('span');
             geomNoteSpan.setAttribute('aria-hidden', 'true');
-            geomNoteSpan.innerHTML = '&times;'
+            geomNoteSpan.innerHTML = '&times;';
             geomNoteButton.appendChild(geomNoteSpan);
             geomNoteDiv.innerHTML += '本图层已添加';
             geomNoteDiv.appendChild(geomNoteButton);
@@ -127,7 +132,12 @@ function GeomlistCheck(filename, geomname) {
 }
 
 function addGeom(filename, geomname, layer) {
-    viewList.push(geomname);
+    if (viewList.includes(geomname)) {
+        var geomfileNameDiv = document.getElementById('viewListDiv' + geomname);
+        geomfileNameDiv.parentNode.removeChild(geomfileNameDiv);
+    } else {
+        viewList.push(geomname);
+    }
     var geomviewList = document.getElementById('geomviewList');
     var geomfileNameDiv = document.createElement('div');
     var geomfileNameLabel = document.createElement('label');
@@ -153,4 +163,5 @@ function addGeom(filename, geomname, layer) {
             geoSymbolFeature.style.display = 'none';
         }
     });
+    return true;
 }

@@ -1,5 +1,5 @@
 // 准备着色字段选择框
-function selectFieldList(feature, filename, geomname) {
+function selectFieldList() {
     var modalBody = document.getElementById('fieldModalBody');
     modalBody.innerHTML = '';
     var modalintr = document.createElement('p');
@@ -8,19 +8,19 @@ function selectFieldList(feature, filename, geomname) {
     var modalfileName = document.createElement('p');
     modalfileName.setAttribute('id', 'modalfilename');
     modalfileName.setAttribute('class', 'modalinfo');
-    modalfileName.innerHTML = filename;
+    modalfileName.innerHTML = geoData.filename;
     modalBody.appendChild(modalfileName);
     var modalgeomName = document.createElement('p');
     modalgeomName.setAttribute('id', 'modalgeomname');
     modalgeomName.setAttribute('class', 'modalinfo');
-    modalgeomName.innerHTML = geomname;
+    modalgeomName.innerHTML = geoData.geomname;
     modalBody.appendChild(modalgeomName);
     // 生成数据中的所有字段
     var modalDivideNum = document.createElement('input');
     modalDivideNum.setAttribute('placeholder', '若是数值型字段(常住人口、GDP等)的分类, 请输入分类数量(默认为5)');
     modalDivideNum.setAttribute('id', 'SymbolDivideNumInput');
     modalBody.appendChild(modalDivideNum);
-    for (var i = 0; i < Object.keys(feature.properties).length; i++) {
+    for (var i = 0; i < Object.keys(geoData.fields.properties).length; i++) {
         var fieldDiv = document.createElement('div');
         fieldDiv.setAttribute('class', 'radio');
         var fieldLabel = document.createElement('label');
@@ -28,7 +28,7 @@ function selectFieldList(feature, filename, geomname) {
         fieldInput.setAttribute('type', 'radio');
         fieldInput.setAttribute('name', 'fieldSelectList');
         fieldLabel.appendChild(fieldInput);
-        fieldLabel.innerHTML += Object.keys(feature.properties)[i];
+        fieldLabel.innerHTML += Object.keys(geoData.fields.properties)[i];
         fieldDiv.appendChild(fieldLabel);
         modalBody.appendChild(fieldDiv);
     }
@@ -43,10 +43,9 @@ function selectFieldList(feature, filename, geomname) {
 // 选择字段并渲染文件
 function selectField() {
     $('#fieldModal').modal('hide');
-
-    // 读取数据名称和矢量要素表名
-    geoData.filename = document.getElementById('modalfilename').innerHTML;
-    geoData.geomname = document.getElementById('modalgeomname').innerHTML;
+    if (geoData.Layer) {
+        geoData.Layer.remove();
+    }
 
     // 以setGeoJsonStyle方案生成可视化
     geoData.Layer = L.geoJSON(geojson, {
@@ -76,45 +75,41 @@ function selectField() {
 function setGeoJsonStyle(feature) {
     // 尝试获取图例项外部DIV
     var geoLegendContent = document.getElementById('legend-' + geoData.geomname);
-    if (geoLegendContent) {
-        // 自Data库读取数据, 未完成
-        Data.get(geoData.geomname);
+    // 自Data库读取数据, 未完成
+    Data.get(geoData.geomname);
 
-    } else {
-        // 确定用于渲染的字段, fieldSymbol为string类型
-        var fieldRadios = document.getElementsByName('fieldSelectList');
-        var i;
-        for (var i = 0; i < fieldRadios.length; i++) {
-            if (fieldRadios[i].checked) {
-                geoData.fieldSymbol = fieldRadios[i].parentNode.innerHTML.replace(/\s+/g,"").slice(41,fieldRadios[i].parentNode.innerHTML.replace(/\s+/g,"").length);
-                break;
-            }
+    // 确定用于渲染的字段, fieldSymbol为string类型
+    var fieldRadios = document.getElementsByName('fieldSelectList');
+    for (var i = 0; i < fieldRadios.length; i++) {
+        if (fieldRadios[i].checked) {
+            geoData.fieldSymbol = fieldRadios[i].parentNode.innerHTML.replace(/\s+/g,"").slice(41,fieldRadios[i].parentNode.innerHTML.replace(/\s+/g,"").length);
+            break;
         }
-
-        // 传入选择用以可视化的字段，返回属性值的划分方案，通过全局变量传入setGeoJsonStyle函数
-        // fieldStyle = [0, 10, 20, 30, 40] 或 fieldStyle = [filename]
-        // symbolDivideNum为颜色划分的种类数量int变量
-        if (i === fieldRadios.length) {
-            geoData.fieldSymbol = null;
-            geoData.SymbolDivideNum = 0;
-        } else {
-            geoData.SymbolDivideNum = document.getElementById('SymbolDivideNumInput').value;
-            // 默认值颜色分类为4级
-            if (geoData.SymbolDivideNum === "") {
-                geoData.SymbolDivideNum = 4;
-            }
-        }
-        geoData.fieldStyle = symbolDivideList(geoData.fieldSymbol, geoData.SymbolDivideNum);
-
-        // 返回渲染设置
-        var geoStyleOption = {
-            weight: 1,
-            opacity: 1,
-            color: 'white',
-            fillOpacity: 0.4,
-            fillColor: getColor(eval('feature.properties.' + geoData.fieldSymbol), geoData.fieldStyle, geoData.SymbolDivideNum, [])
-        };
     }
+
+    // 传入选择用以可视化的字段，返回属性值的划分方案，通过全局变量传入setGeoJsonStyle函数
+    // fieldStyle = [0, 10, 20, 30, 40] 或 fieldStyle = [filename]
+    // symbolDivideNum为颜色划分的种类数量int变量
+    if (i === fieldRadios.length) {
+        geoData.fieldSymbol = null;
+        geoData.SymbolDivideNum = 0;
+    } else {
+        geoData.SymbolDivideNum = document.getElementById('SymbolDivideNumInput').value;
+        // 默认值颜色分类为4级
+        if (geoData.SymbolDivideNum === "") {
+            geoData.SymbolDivideNum = 4;
+        }
+    }
+    geoData.fieldStyle = symbolDivideList(geoData.fieldSymbol, geoData.SymbolDivideNum);
+
+    // 返回渲染设置
+    var geoStyleOption = {
+        weight: 1,
+        opacity: 1,
+        color: 'white',
+        fillOpacity: 0.4,
+        fillColor: getColor(eval('feature.properties.' + geoData.fieldSymbol), geoData.fieldStyle, geoData.SymbolDivideNum, [])
+    };
     return geoStyleOption;
 }
 //划定显示分级表, args为字段名的string变量
@@ -202,6 +197,10 @@ function getColor(args, divideList, SymbolDivideNum, legendColorList) {
 
 // 图例表初始化
 function setLegend(fieldSymbol, filename, geomname, fieldStyle, SymbolDivideNum, legendColorList) {
+    var legendDiv = document.getElementById('legend-' + geomname);
+    if (legendDiv) {
+        legendDiv.parentNode.removeChild(legendDiv);
+    }
     prepareLegend(fieldSymbol, filename, geomname, fieldStyle, SymbolDivideNum, legendColorList);
 }
 // 当 fieldStyle.length = 1 且 SymbolDivideNum = 0 时, 可以判定为素色渲染, 否则为彩色渲染
@@ -209,7 +208,7 @@ function prepareLegend(fieldSymbol, filename, geomname, fieldStyle, SymbolDivide
     // 获取图例框要素
     var geoSymbolContainer = document.getElementById('geoSymbolContainer');
     // legend最外围container
-    var geoSymbolFeature = document.createElement('div')
+    var geoSymbolFeature = document.createElement('div');
     geoSymbolFeature.setAttribute('id', 'legend-' + geomname);
     // 首行显示被渲染的字段-row行
     var geoSymbolHeaderRow = document.createElement('div');
@@ -218,6 +217,7 @@ function prepareLegend(fieldSymbol, filename, geomname, fieldStyle, SymbolDivide
     var geoSymbolHeading = document.createElement('div');
     geoSymbolHeading.setAttribute('class', 'col-md-12');
     geoSymbolHeading.setAttribute('id', 'geoSymbolHeader-' + geomname);
+    geoSymbolHeading.setAttribute('onclick', 'selectFieldList()');
     if (fieldSymbol === null) {
         geoSymbolHeading.innerHTML = '点此选择渲染字段';
     } else {
@@ -263,23 +263,9 @@ function prepareLegend(fieldSymbol, filename, geomname, fieldStyle, SymbolDivide
     }
     // 图例框要素加载图例DIV
     geoSymbolContainer.appendChild(geoSymbolFeature);
-
-    // 绑定颜色选择框
-    // $('.legendColor').colpick({
-    //     colorScheme: 'light',
-    //     color: 'ffffff',
-    //     onChange: function (hsb, hex, rgb, el) {
-    //         $(el).css('background-color', 'rgba(' + rgb.r + ', ' + rgb.g + ', ' + rgb.b + ', 1)');
-    //     },
-    //     onSubmit: function (hsb, hex, rgb, el) {
-    //         // geojsonChangeColor(geomname);
-    //         $(el).colpickHide();
-    //     }
-    // });
 }
 // 调用颜色选择器
 function selectColor(geomname, i) {
-    
     // 弹出图例颜色选择框
     $('#legendColorDiv-' + geomname + '-' + i).colpick({
         colorScheme: 'light',
