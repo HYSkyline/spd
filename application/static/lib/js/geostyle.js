@@ -127,7 +127,10 @@ function symbolDivideList(args, SymbolDivideNum) {
             // console.log('颜色分类:' + SymbolDivideNum.toString());
             // 以values为容器，通过eval传入具体的属性值
             for (var i = 0; i < geojson.features.length; i++) {
-                values.push(eval('geojson.features[i].properties.' + args));
+                var propertyValue = eval('geojson.features[i].properties.' + args);
+                if (propertyValue !== null) {
+                    values.push(propertyValue);
+                }
             }
             // 对具体属性值进行排序
             values.sort(compareFunction);
@@ -165,6 +168,9 @@ function getColor(args, divideList, SymbolDivideNum, legendColorList) {
             for (var i = 0; i < SymbolDivideNum; i++) {
                 // console.log('当前i: ' + i.toString() + '  当前属性值: ' + args.toString() + '  对比标准: ' + divideList[i].toString());
                 if (geoData.renderType === 'numType') {
+                    if (args === null) {
+                        return 'rgba(255, 255, 255, 1)';
+                    }
                     if (args > divideList[i]) {
                         // console.log('返回颜色: ' + legendColorList[i]);
                         return legendColorList[i];
@@ -191,6 +197,9 @@ function getColor(args, divideList, SymbolDivideNum, legendColorList) {
             for (var i = 0; i < SymbolDivideNum; i++) {
                 // console.log('当前属性值: ' + args.toString() + '  对比标准: ' + divideList[i].toString());
                 if (geoData.renderType === 'numType') {
+                    if (args === null) {
+                        return 'rgba(255, 255, 255, 1)';
+                    }
                     if (args > divideList[i]) {
                         // console.log('返回颜色: ' + legendColorList[i]);
                         return legendColorList[i];
@@ -270,7 +279,13 @@ function prepareLegend(fieldSymbol, filename, geomname, fieldStyle, SymbolDivide
         // 图例颜色列加载颜色具体要素
         geoSymbolColor.appendChild(geoSymbolColorDiv);
         // 标出图例标注的具体内容
-        geoSymbolLabel.innerHTML = fieldStyle[i].toString();
+        var fieldValue;
+        if (fieldStyle[i] === null) {
+            fieldValue = '<空>';
+        } else {
+            fieldValue = fieldStyle[i].toString();
+        }
+        geoSymbolLabel.innerHTML = fieldValue;
 
         // 该图例行加载颜色与标注
         geoSymbolRow.appendChild(geoSymbolColor);
